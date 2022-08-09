@@ -1,25 +1,36 @@
 import java.util.*;
 
+/**
+ * Tic Tac Toe against a random CPU or a friend
+ */
 public class TicTacToe {
 
+    /* Instance variables */
     private static ArrayList<Integer> playerSpots = new ArrayList<>();
     private static ArrayList<Integer> cpuSpots = new ArrayList<>();
+    private static int mode;
+    private static String player1;
+    private static String player2;
 
+    /**
+     * Main method that puts the program together
+     * @param args input to the main method
+     */
     public static void main(String[] args) {
-
         boolean noWinner = true;
         char[][] gameBoard = {{' ', '|', ' ', '|', ' '},
                 {'-', '+', '-', '+', '-'},
                 {' ', '|', ' ', '|', ' '},
                 {'-', '+', '-', '+', '-'},
                 {' ', '|', ' ', '|', ' '}};
+        askUser();
         while (noWinner) {
-            turn(gameBoard, "user");
+            turn(gameBoard, "user", mode);
             if (!checkWinner().equals("no winner yet")) break;
             board(gameBoard);
             printSpaces();
 
-            turn(gameBoard, "cpu");
+            turn(gameBoard, "cpu", mode);
             if (!checkWinner().equals("no winner yet")) break;
             board(gameBoard);
             printSpaces();
@@ -27,22 +38,53 @@ public class TicTacToe {
         board(gameBoard);
         printSpaces();
         System.out.println(checkWinner());
-
     }
 
+    /**
+     * Prints the board with each players' markers
+     * @param gameBoard the current board
+     */
     public static void board(char[][] gameBoard) {
-
         for (char[] array : gameBoard) {
             for (char space : array) {
                 System.out.print(space);
             }
             System.out.println();
         }
-
     }
 
-    public static void turn(char[][] gameBoard, String player) {
+    /**
+     * Asks the user which mode they want to play
+     */
+    public static void askUser() {
+        boolean validResponse = false;
+        while (!validResponse) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Enter 0 to play against a cpu or enter 1 for two-player mode:");
+            mode = scanner.nextInt();
+            if (mode == 1) {
+                System.out.println("Enter Player 1's name:");
+                player1 = scanner.next();
+                System.out.println("Enter Player 2's name:");
+                player2 = scanner.next();
+                validResponse = true;
+            } else if (mode == 0) {
+                player1 = "user";
+                player2 = "cpu";
+                validResponse = true;
+            } else {
+                System.out.println("Sorry! You must enter either 0 or 1");
+            }
+        }
+    }
 
+    /**
+     * Executes the player's or cpu's turn
+     * @param gameBoard the current board
+     * @param player the current player's turn
+     * @param mode either the cpu mode or the two-player mode
+     */
+    public static void turn(char[][] gameBoard, String player, int mode) {
         char marker; int spot = 0; boolean validSpot = true;
         Scanner scanner = new Scanner(System.in);
         if (player.equals("user")) {
@@ -60,9 +102,22 @@ public class TicTacToe {
             playerSpots.add(spot);
         } else {
             marker = 'O';
-            while (validSpot) {
-                spot = new Random().nextInt(9) + 1;
-                if (!playerSpots.contains(spot) && !cpuSpots.contains(spot)) validSpot = false;
+            if (mode == 0) {
+                while (validSpot) {
+                    spot = new Random().nextInt(9) + 1;
+                    if (!playerSpots.contains(spot) && !cpuSpots.contains(spot)) validSpot = false;
+                }
+            } else {
+                while (validSpot) {
+                    System.out.println("Enter a number from 1-9:");
+                    spot = scanner.nextInt();
+                    if (!playerSpots.contains(spot) && !cpuSpots.contains(spot)) {
+                        printSpaces();
+                        validSpot = false;
+                    } else {
+                        System.out.println("Sorry! This spot has already been taken.");
+                    }
+                }
             }
             cpuSpots.add(spot);
         }
@@ -95,11 +150,13 @@ public class TicTacToe {
                 gameBoard[4][4] = marker;
                 break;
         }
-
     }
 
+    /**
+     * Checks if there is a winner or if the game is tied
+     * @return the outcome message (win, loss, or tie)
+     */
     public static String checkWinner() {
-
         List<List> winning = new ArrayList<List>();
         winning.add(Arrays.asList(1, 2, 3));
         winning.add(Arrays.asList(4, 5, 6));
@@ -112,9 +169,11 @@ public class TicTacToe {
 
         for (List arraylist : winning) {
             if (playerSpots.containsAll(arraylist)) {
-                return "Congratulations, you won!";
+                if (mode == 0) return "Congratulations, you won!";
+                else return player1 + " wins!";
             } else if (cpuSpots.containsAll(arraylist)) {
-                return "Sorry, you lost!";
+                if (mode == 0) return "Sorry, you lost!";
+                else return player2 + " wins!";
             }
         }
 
@@ -122,9 +181,11 @@ public class TicTacToe {
             return "Tie!";
         }
         return "no winner yet";
-
     }
 
+    /**
+     * Prints spaces for a nice look
+     */
     public static void printSpaces() {
         System.out.println();
         System.out.println("------");
